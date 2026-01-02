@@ -57,7 +57,6 @@ library(truncnorm)
 #BiocManager::install("flowCore")
 
 source("./MetDist_functions.R")
-source("./mothur_tools.R")
 ```
 
 ```{r figure_setup}
@@ -86,43 +85,25 @@ theme_set(theme_classic() +
 ```
 
 ```{r}
-met_ULRG <- list(MD_ULRG_01_A, MD_ULRG_02_A, MD_ULRG_03_A, MD_ULRG_04_A, MD_ULRG_05_A, MD_ULRG_06_A, MD_ULRG_07_A, MD_ULRG_08_A, MD_ULRG_09_A, MD_ULRG_10_A, MD_ULRG_11_A, MD_ULRG_12_A, MD_ULRG_13_A, MD_ULRG_14_A, MD_ULRG_01_B, MD_ULRG_02_B, MD_ULRG_03_B, MD_ULRG_04_B, MD_ULRG_05_B, MD_ULRG_06_B, MD_ULRG_07_B, MD_ULRG_08_B, MD_ULRG_09_B, MD_ULRG_10_B, MD_ULRG_11_B, MD_ULRG_12_B, MD_ULRG_13_B, MD_ULRG_14_B)
+MD_Isolates <- c("IUB2501" = "IUB2501.fcs", "IUB2506" = "IUB2506.fcs", "IUB2507" = "IUB2507.fcs", "IUB2508" = "IUB2508.fcs", "IUB2509" = "IUB2509.fcs", "IUB2510" = "IUB2510.fcs", "IUB2512" = "IUB2512.fcs", "IUB2513" = "IUB2513.fcs", "IUB2516" = "IUB2516.fcs", "IUB2518" = "IUB2518.fcs", "IUB2519" = "IUB2519.fcs", "IUB2523" = "IUB2523.fcs", "IUB2524" = "IUB2524.fcs", "IUB2528" = "IUB2528.fcs", "IUB2531" = "IUB2531.fcs", "IUB2536" = "IUB2536.fcs", "KBS1023" = "KBS1023.fcs", "KBS1027" = "KBS1027.fcs", "KBS1029" = "KBS1029.fcs", "KBS1032" = "KBS1032.fcs", "KBS1033" = "KBS1033.fcs", "KBS1048" = "KBS1048.fcs", "KBS1052" = "KBS1052.fcs")
 
-samples_ULRG <- c("MD_UL_01_A", "MD_UL_02_A", "MD_UL_03_A", "MD_UL_04_A", "MD_UL_05_A", "MD_UL_06_A", "MD_UL_07_A", "MD_UL_08_A", "MD_UL_09_A", "MD_UL_10_A", "MD_UL_11_A", "MD_UL_12_A", "MD_UL_13_A", "MD_UL_14_A","MD_UL_01_B", "MD_UL_02_B", "MD_UL_03_B", "MD_UL_04_B", "MD_UL_05_B", "MD_UL_06_B", "MD_UL_07_B", "MD_UL_08_B", "MD_UL_09_B", "MD_UL_10_B", "MD_UL_11_B", "MD_UL_12_B", "MD_UL_13_B", "MD_UL_14_B")
-
-MD_ULRG_G3 <- c("MD_ULRG_01_A"="UL01A_RSG.fcs", "MD_ULRG_02_A"="UL02A_RSG.fcs", "MD_ULRG_03_A"="UL03A_RSG.fcs", "MD_ULRG_04_A"="UL04A_RSG.fcs", "MD_ULRG_05_A"="UL05A_RSG.fcs", "MD_ULRG_06_A"="UL06A_RSG.fcs", "MD_ULRG_07_A"="UL07A_RSG.fcs", "MD_ULRG_08_A"="UL08A_RSG.fcs", "MD_ULRG_09_A"="UL09A_RSG.fcs", "MD_ULRG_10_A"="UL10A_RSG.fcs", "MD_ULRG_11_A"="UL11A_RSG.fcs", "MD_ULRG_12_A"="UL12A_RSG.fcs", "MD_ULRG_13_A"="UL13A_RSG.fcs", "MD_ULRG_14_A"="UL14A_RSG.fcs", "MD_ULRG_01_B"="UL01B_RSG.fcs", "MD_ULRG_02_B"="UL02B_RSG.fcs", "MD_ULRG_03_B"="UL03B_RSG.fcs", "MD_ULRG_04_B"="UL04B_RSG.fcs", "MD_ULRG_05_B"="UL05B_RSG.fcs", "MD_ULRG_06_B"="UL06B_RSG.fcs", "MD_ULRG_07_B"="UL07B_RSG.fcs", "MD_ULRG_08_B"="UL08B_RSG.fcs", "MD_ULRG_09_B"="UL09B_RSG.fcs", "MD_ULRG_10_B"="UL10B_RSG.fcs", "MD_ULRG_11_B"="UL11B_RSG.fcs", "MD_ULRG_12_B"="UL12B_RSG.fcs", "MD_ULRG_13_B"="UL13B_RSG.fcs", "MD_ULRG_14_B"="UL14B_RSG.fcs")
-
-for(key in names(MD_ULRG_G3)){
-#  assign(key, process(here("data", "MetDistRA21", "ULRG_RSG_R3Gate", MD_ULRG_G3[key]), "B530-H", TRUE))
-    assign(key, process(here("data", "MetDistRA21", "ULRG_RSG_R3Gate", MD_ULRG_G3[key]), "B530-H", FALSE))
+for(key in names(MD_Isolates)){
+#  assign(key, process(here("data", "Isolate_M1", MD_Isolates[key]), "B530-H", TRUE))
+    assign(key, process(here("data", "Isolate_M1", MD_Isolates[key]), "B530-H", FALSE))
 }
+
+met_all <- list(IUB2501, IUB2506, IUB2507, IUB2508, IUB2509, IUB2510, IUB2512, IUB2513, IUB2516, IUB2518, IUB2519, IUB2523, IUB2524, IUB2528, IUB2531, IUB2536, KBS1023, KBS1027, KBS1029, KBS1032, KBS1033, KBS1048, KBS1052)
+
+samples_all <- c("IUB2501", "IUB2506", "IUB2507", "IUB2508", "IUB2509", "IUB2510", "IUB2512", "IUB2513", "IUB2516", "IUB2518", "IUB2519", "IUB2523", "IUB2524", "IUB2528", "IUB2531", "IUB2536", "KBS1023", "KBS1027", "KBS1029", "KBS1032", "KBS1033", "KBS1048", "KBS1052")
+
+met_samples <- read.csv(here("data","MD_Isolates.csv"))
 ```
 
-## Read in metadata and generate metadata Samples dataframe
-```{r}
-Samples <- read.csv(here("data","MetDistRA21", "MetDistRA21_Samples.csv"))
-GSSF_G <- read.csv(here("data", "GSSF-G.csv"), header = TRUE)
-Samples <- as.data.frame(BP_fxn(read.csv(here("data", "MetDistRA21", "RTLC_BP.csv"), header = FALSE), Samples, "RTLC"))
-Samples <- as.data.frame(BP_fxn(read.csv(here("data", "MetDistRA21", "20210825_ULRG_SYBR_RSG_ATP", "20210825_ULRG_BP.csv"), header = FALSE), Samples, "ULRG"))
-Samples <- subset(Samples, select = -c(DPM, DPMKills, molLeu, molLeuLhr, gCLhr))
-
-Samples <- subset(Samples, Samples$Set != "EC_GC")
-
-met_samples <- rbind(subset(Samples, Samples$Set == "RTLC"), subset(Samples, Samples$Set == "ULRG"), subset(Samples, Samples$Set == "ULRG"), subset(Samples, Samples$Set == "GSSF"))
-met_samples$Sample <- samples_all
-met_samples$Tau <- log((10^met_samples$Tau)/60, 10)
-
-met_samples$Lake_rep <- c(rep(NA, 64), rep(c("A", "B", "C", "D", "E"), 10))
-met_samples$Time <- c(rep(NA, 64), GSSF_G$Mins)
-met_samples$Hours <- c(rep(NA, 64), GSSF_G$Mins/60)
-met_samples$OD600 <- c(rep(NA, 64), GSSF_G$OD)
-
-```
 
 #Lnorm - all data
 ```{r}
 metn <- 1
-ln_fits <- data.frame("Sample" = NA, "Set" = NA, "RSG_ab" = NA, "qlnorm" = NA)
+ln_fits <- data.frame("Sample" = NA, "Location" = NA, "RSG_ab" = NA, "qlnorm" = NA)
 ln_param <- data.frame("Sample" = NA, "meanlog" = NA, "sdlog" = NA, "AIC_ln" = NA,"BIC_ln" = NA, "lL_ln" = NA, "R2_ln" = NA)
 for(met1 in met_all){
   
@@ -147,9 +128,9 @@ for(met1 in met_all){
   fun_ecdf <- ecdf(met_sub[,"RSG_ab"])
   R2 <- summary(lm(fun_ecdf(met_sub[,"RSG_ab"])~ plnorm(met_sub[,"RSG_ab"], coef(mle_fit)[1], coef(mle_fit)[2])))$r.squared
 
-  fit <- cbind(rep(samples_all[metn], length(met_sub[,"RSG_ab"])),rep(met_samples[metn, "Set"], length(met_sub[,"RSG_ab"])), met_sub, qlnorm)
+  fit <- cbind(rep(samples_all[metn], length(met_sub[,"RSG_ab"])), rep(met_samples[metn, "Location"], length(met_sub[,"RSG_ab"])), met_sub, qlnorm)
   ln_param <- rbind(ln_param, data.frame("Sample" = samples_all[metn], "meanlog" = coef(mle_fit)[1], "sdlog" = coef(mle_fit)[2], "AIC_ln" = AIC(mle_fit),"BIC_ln" = 2*(log(length(met_sub[,"RSG_ab"]))) - 2*logLik(mle_fit), "lL_ln" = logLik(mle_fit), "R2_ln" = R2))
-  colnames(fit) <- c("Sample", "Set", "RSG_ab", "qlnorm")
+  colnames(fit) <- c("Sample", "Location", "RSG_ab", "qlnorm")
   ln_fits <- rbind(ln_fits, fit)
   
   metn <- metn + 1
@@ -159,48 +140,10 @@ ln_fits <- ln_fits[-1,]
 ln_fits <- subset(ln_fits, ln_fits$qlnorm != "Inf")
 ln_param <- ln_param[-1,]
 
-CI <- data.frame("x_ci" = seq(0, 7, 0.5), "y_ci" = seq(0, 7, 0.5))
-
-
 
 met_samples <- cbind(met_samples, ln_param[,c("meanlog", "sdlog", "AIC_ln", "BIC_ln", "lL_ln", "R2_ln")])
 
-# ln_boots <- c()
-# x <- 0
-# while(x < 10000){
-#   fits <- sample_n(ln_fits, 5000)
-#   ln_boots <- c(ln_boots, summary(lm(log(fits$RSG_ab,10) ~ log(fits$qlnorm, 10)))$r.squared)
-#   x <- x + 1
-#   if(x%%100 == 0){
-#     print(x)
-#   }
-# }
-# 
-# ln_boot_r2 <- round(mean(ln_boots),2)
 
-CI <- data.frame("x_ci" = seq(0, 7, 0.5), "y_ci" = seq(0, 7, 0.5))
-
-Lnorm_fit_plot <- ln_fits %>% sample_n(10000) %>%
-  ggplot(aes(y = log(qlnorm, 10), x = log(RSG_ab, 10)))+
-  geom_point(alpha = 0.03, pch = 4, color = cols[3])+
-  geom_ribbon(data = CI, aes(x = x_ci, y = y_ci, ymin = y_ci-1, ymax = y_ci+1), fill = alpha("black", 0.1))+
-  geom_abline(slope = 1, color = "black", size = 1, linetype = "dashed")+
-  ylab("Predicted values")+
-  xlab("Observed values")+
-  ggtitle("Lognormal")+
-  scale_x_continuous(labels = label_math(expr = 10^.x, format = force))+
-  scale_y_continuous(labels = label_math(expr = 10^.x, format = force), breaks = c(-3,0,3,6))+
-  annotate("text", x = 2.5, y = 7, label = "italic(r[plain('m')]^2)==0.91", size = 5, parse = TRUE)+
-  coord_cartesian(xlim = c(2,6), ylim = c(-4, 8))
-
-Lnorm_fit_plot
-
-
-ggsave("../output/QQ_Lnorm.png", width = 3.5, height = 3.5)
-
-```
-
-```{r}
 top20 <- c()
 for(met1 in met_all){
   quantile_cutoff <- quantile(met1$RSG_ab, 0.8)
@@ -211,4 +154,39 @@ for(met1 in met_all){
 }
 
 met_samples$top20 <- top20
+
+ln_boots <- c()
+x <- 0
+while(x < 10000){
+  fits <- sample_n(ln_fits, 5000)
+  ln_boots <- c(ln_boots, summary(lm(log(fits$RSG_ab,10) ~ log(fits$qlnorm, 10)))$r.squared)
+  x <- x + 1
+  if(x%%100 == 0){
+    print(x)
+  }
+}
+
+ln_boot_r2 <- round(mean(ln_boots),2)
+
+CI <- data.frame("x_ci" = seq(0, 7, 0.5), "y_ci" = seq(0, 7, 0.5))
+
+Lnorm_fit_plot <- ln_fits %>% sample_n(10000) %>%
+  ggplot(aes(y = log(qlnorm, 10), x = log(RSG_ab, 10)))+
+  geom_point(alpha = 0.03, pch = 4, color = "darkgreen")+
+  geom_ribbon(data = CI, aes(x = x_ci, y = y_ci, ymin = y_ci-1, ymax = y_ci+1), fill = alpha("black", 0.1))+
+  geom_abline(slope = 1, color = "black", size = 1, linetype = "dashed")+
+  ylab("Predicted values")+
+  xlab("Observed values")+
+  ggtitle("Lognormal")+
+  scale_x_continuous(labels = label_math(expr = 10^.x, format = force))+
+  scale_y_continuous(labels = label_math(expr = 10^.x, format = force), breaks = c(0,3,6))+
+  annotate("text", x = 3, y = 7, label = "italic(r[plain('m')]^2)==0.96", size = 5, parse = TRUE)+
+  coord_cartesian(xlim = c(2,6), ylim = c(-1, 8))
+
+Lnorm_fit_plot
+
+
+ggsave("../output/QQ_Lnorm.png", width = 3.5, height = 3.5)
+
+write.csv(met_samples, file = "../data/MD_Isolates_Params.csv", row.names = FALSE)
 ```
