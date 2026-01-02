@@ -1,0 +1,192 @@
+---
+title: "MetDist Pipeline"
+author: "Emmi Mueller"
+date: "2025-12-16"
+output: pdf_document
+---
+
+```{r setup, echo=FALSE}
+rm(list=ls())
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.align = "center",
+  message = FALSE,
+  warning = FALSE,
+  tidy.opts = list(width.cutoff = 60),
+  tidy = TRUE)
+```
+
+```{r}
+library("BiocManager")
+library("vegan")
+library("fitdistrplus")
+library("ggplot2")
+library("car")
+library("actuar")
+library("scales")
+library("MoMAColors")
+library("bbmle")
+library("dplyr")
+library("mgcv")
+library("tidyr")
+library("cowplot")
+library("here")
+#library("ggridges")
+library("rsq")
+# library("gdata")
+library("ggpmisc")
+# library("ggpp")
+# library("ggsignif")
+# library("Pareto")
+# library("spatstat")
+#library("aod")
+# library("stats")
+library("tidymv")
+# library("plot3D")
+# library("ggformula")
+# library("DescTools")
+# library("tibble")
+# library("ggpubr")
+library(multcompView)
+library(grDevices)
+library(truncnorm)
+
+#devtools::install_github("johannesbjork/LaCroixColoR")
+#library(LaCroixColoR)
+#BiocManager::install("flowCore")
+
+source("./MetDist_functions.R")
+```
+
+```{r figure_setup}
+my.cols <- RColorBrewer::brewer.pal(n = 4, name = "Greys")[3:4]
+
+# Set theme for figures in the paper
+theme_set(theme_classic() + 
+  theme(axis.title = element_text(size = 16),
+        axis.title.x = element_text(margin = margin(t = 15, b = 15)),
+        axis.title.y = element_text(margin = margin(l = 15, r = 15)),
+        axis.text = element_text(size = 13),
+        axis.text.x = element_text(margin = margin(t = 5)),
+        axis.text.y = element_text(margin = margin(r = 5)),
+        #axis.line.x = element_line(linewidth = 1),
+        #axis.line.y = element_line(linewidth = 1),
+        axis.line.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.ticks.x = element_line(linewidth = 1),
+        axis.ticks.y = element_line(linewidth = 1),
+        axis.ticks.length = unit(.1, "in"),
+        panel.border = element_rect(color = "grey20", fill = NA, linewidth = 1.5),
+        legend.text = element_text(size = 14),
+        strip.text = element_text(size = 14),
+        strip.background = element_blank()
+        ))
+```
+
+```{r}
+MD_Isolates <- c("IUB2501" = "IUB2501.fcs", "IUB2506" = "IUB2506.fcs", "IUB2507" = "IUB2507.fcs", "IUB2508" = "IUB2508.fcs", "IUB2509" = "IUB2509.fcs", "IUB2510" = "IUB2510.fcs", "IUB2512" = "IUB2512.fcs", "IUB2513" = "IUB2513.fcs", "IUB2516" = "IUB2516.fcs", "IUB2518" = "IUB2518.fcs", "IUB2519" = "IUB2519.fcs", "IUB2523" = "IUB2523.fcs", "IUB2524" = "IUB2524.fcs", "IUB2528" = "IUB2528.fcs", "IUB2531" = "IUB2531.fcs", "IUB2536" = "IUB2536.fcs", "KBS1023" = "KBS1023.fcs", "KBS1027" = "KBS1027.fcs", "KBS1029" = "KBS1029.fcs", "KBS1032" = "KBS1032.fcs", "KBS1033" = "KBS1033.fcs", "KBS1048" = "KBS1048.fcs", "KBS1052" = "KBS1052.fcs")
+
+for(key in names(MD_Isolates)){
+#  assign(key, process(here("data", "Isolate_M1", MD_Isolates[key]), "B530-H", TRUE))
+    assign(key, process(here("data", "Isolate_M1", MD_Isolates[key]), "B530-H", FALSE))
+}
+
+met_all <- list(IUB2501, IUB2506, IUB2507, IUB2508, IUB2509, IUB2510, IUB2512, IUB2513, IUB2516, IUB2518, IUB2519, IUB2523, IUB2524, IUB2528, IUB2531, IUB2536, KBS1023, KBS1027, KBS1029, KBS1032, KBS1033, KBS1048, KBS1052)
+
+samples_all <- c("IUB2501", "IUB2506", "IUB2507", "IUB2508", "IUB2509", "IUB2510", "IUB2512", "IUB2513", "IUB2516", "IUB2518", "IUB2519", "IUB2523", "IUB2524", "IUB2528", "IUB2531", "IUB2536", "KBS1023", "KBS1027", "KBS1029", "KBS1032", "KBS1033", "KBS1048", "KBS1052")
+
+met_samples <- read.csv(here("data","MD_Isolates.csv"))
+```
+
+
+#Lnorm - all data
+```{r}
+metn <- 1
+ln_fits <- data.frame("Sample" = NA, "Location" = NA, "RSG_ab" = NA, "qlnorm" = NA)
+ln_param <- data.frame("Sample" = NA, "meanlog" = NA, "sdlog" = NA, "AIC_ln" = NA,"BIC_ln" = NA, "lL_ln" = NA, "R2_ln" = NA)
+for(met1 in met_all){
+  
+  met_sub <- met1
+  nll_ln <- function(meanlog, sdlog) {
+    -sum(dlnorm((met_sub[,"RSG_ab"]), meanlog = meanlog, sdlog = sdlog, log = TRUE))
+  }
+  mle_fit <- mle2(
+    minuslogl = nll_ln,
+    start = list(meanlog = 1, sdlog = median(met_sub[,"RSG_ab"])),  # Reasonable starting values
+    lower = c(0.001, 0.001),
+    upper = c(Inf, Inf),
+    method = "L-BFGS-B"
+  )
+  print(samples_all[metn])
+  print(summary(mle_fit))
+  
+  e_cdf <- rank(met_sub[,"RSG_ab"])/length(met_sub[,"RSG_ab"])
+  
+  qlnorm <- qlnorm(e_cdf, meanlog = coef(mle_fit)[1], sdlog = coef(mle_fit)[2])
+  
+  fun_ecdf <- ecdf(met_sub[,"RSG_ab"])
+  R2 <- summary(lm(fun_ecdf(met_sub[,"RSG_ab"])~ plnorm(met_sub[,"RSG_ab"], coef(mle_fit)[1], coef(mle_fit)[2])))$r.squared
+
+  fit <- cbind(rep(samples_all[metn], length(met_sub[,"RSG_ab"])), rep(met_samples[metn, "Location"], length(met_sub[,"RSG_ab"])), met_sub, qlnorm)
+  ln_param <- rbind(ln_param, data.frame("Sample" = samples_all[metn], "meanlog" = coef(mle_fit)[1], "sdlog" = coef(mle_fit)[2], "AIC_ln" = AIC(mle_fit),"BIC_ln" = 2*(log(length(met_sub[,"RSG_ab"]))) - 2*logLik(mle_fit), "lL_ln" = logLik(mle_fit), "R2_ln" = R2))
+  colnames(fit) <- c("Sample", "Location", "RSG_ab", "qlnorm")
+  ln_fits <- rbind(ln_fits, fit)
+  
+  metn <- metn + 1
+}
+
+ln_fits <- ln_fits[-1,]
+ln_fits <- subset(ln_fits, ln_fits$qlnorm != "Inf")
+ln_param <- ln_param[-1,]
+
+
+met_samples <- cbind(met_samples, ln_param[,c("meanlog", "sdlog", "AIC_ln", "BIC_ln", "lL_ln", "R2_ln")])
+
+
+top20 <- c()
+for(met1 in met_all){
+  quantile_cutoff <- quantile(met1$RSG_ab, 0.8)
+  total_activity <- sum(met1$RSG_ab)
+  top20_activity <- sum(met1[met1 > quantile_cutoff])
+  top20_fraction <- top20_activity/total_activity
+  top20 <- c(top20, top20_fraction)
+}
+
+met_samples$top20 <- top20
+
+ln_boots <- c()
+x <- 0
+while(x < 10000){
+  fits <- sample_n(ln_fits, 5000)
+  ln_boots <- c(ln_boots, summary(lm(log(fits$RSG_ab,10) ~ log(fits$qlnorm, 10)))$r.squared)
+  x <- x + 1
+  if(x%%100 == 0){
+    print(x)
+  }
+}
+
+ln_boot_r2 <- round(mean(ln_boots),2)
+
+CI <- data.frame("x_ci" = seq(0, 7, 0.5), "y_ci" = seq(0, 7, 0.5))
+
+Lnorm_fit_plot <- ln_fits %>% sample_n(10000) %>%
+  ggplot(aes(y = log(qlnorm, 10), x = log(RSG_ab, 10)))+
+  geom_point(alpha = 0.03, pch = 4, color = "darkgreen")+
+  geom_ribbon(data = CI, aes(x = x_ci, y = y_ci, ymin = y_ci-1, ymax = y_ci+1), fill = alpha("black", 0.1))+
+  geom_abline(slope = 1, color = "black", size = 1, linetype = "dashed")+
+  ylab("Predicted values")+
+  xlab("Observed values")+
+  ggtitle("Lognormal")+
+  scale_x_continuous(labels = label_math(expr = 10^.x, format = force))+
+  scale_y_continuous(labels = label_math(expr = 10^.x, format = force), breaks = c(0,3,6))+
+  annotate("text", x = 3, y = 7, label = "italic(r[plain('m')]^2)==0.96", size = 5, parse = TRUE)+
+  coord_cartesian(xlim = c(2,6), ylim = c(-1, 8))
+
+Lnorm_fit_plot
+
+
+ggsave("../output/QQ_Lnorm.png", width = 3.5, height = 3.5)
+
+write.csv(met_samples, file = "../data/MD_Isolates_Params.csv", row.names = FALSE)
+```
