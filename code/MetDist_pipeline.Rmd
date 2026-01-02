@@ -85,6 +85,9 @@ theme_set(theme_classic() +
 ```
 
 ```{r}
+#Processing of data
+#Each sample should have the name it will be called and the fcs file name
+
 MD_Isolates <- c("IUB2501" = "IUB2501.fcs", "IUB2506" = "IUB2506.fcs", "IUB2507" = "IUB2507.fcs", "IUB2508" = "IUB2508.fcs", "IUB2509" = "IUB2509.fcs", "IUB2510" = "IUB2510.fcs", "IUB2512" = "IUB2512.fcs", "IUB2513" = "IUB2513.fcs", "IUB2516" = "IUB2516.fcs", "IUB2518" = "IUB2518.fcs", "IUB2519" = "IUB2519.fcs", "IUB2523" = "IUB2523.fcs", "IUB2524" = "IUB2524.fcs", "IUB2528" = "IUB2528.fcs", "IUB2531" = "IUB2531.fcs", "IUB2536" = "IUB2536.fcs", "KBS1023" = "KBS1023.fcs", "KBS1027" = "KBS1027.fcs", "KBS1029" = "KBS1029.fcs", "KBS1032" = "KBS1032.fcs", "KBS1033" = "KBS1033.fcs", "KBS1048" = "KBS1048.fcs", "KBS1052" = "KBS1052.fcs")
 
 for(key in names(MD_Isolates)){
@@ -92,8 +95,10 @@ for(key in names(MD_Isolates)){
     assign(key, process(here("data", "Isolate_M1", MD_Isolates[key]), "B530-H", FALSE))
 }
 
+#List of R lists with all samples
 met_all <- list(IUB2501, IUB2506, IUB2507, IUB2508, IUB2509, IUB2510, IUB2512, IUB2513, IUB2516, IUB2518, IUB2519, IUB2523, IUB2524, IUB2528, IUB2531, IUB2536, KBS1023, KBS1027, KBS1029, KBS1032, KBS1033, KBS1048, KBS1052)
 
+#List of all sample names
 samples_all <- c("IUB2501", "IUB2506", "IUB2507", "IUB2508", "IUB2509", "IUB2510", "IUB2512", "IUB2513", "IUB2516", "IUB2518", "IUB2519", "IUB2523", "IUB2524", "IUB2528", "IUB2531", "IUB2536", "KBS1023", "KBS1027", "KBS1029", "KBS1032", "KBS1033", "KBS1048", "KBS1052")
 
 met_samples <- read.csv(here("data","MD_Isolates.csv"))
